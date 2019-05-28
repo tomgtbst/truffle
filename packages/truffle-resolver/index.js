@@ -26,14 +26,12 @@ class Resolver {
 
   require(import_path, search_path) {
     // This function might be doing too much. If so, too bad (for now).
-    var self = this;
-
-    for (let i = 0; i < self.sources.length; i++) {
-      var source = self.sources[i];
-      var result = source.require(import_path, search_path);
+    for (let i = 0; i < this.sources.length; i++) {
+      const source = this.sources[i];
+      const result = source.require(import_path, search_path);
       if (result) {
-        var abstraction = contract(result);
-        provision(abstraction, self.options);
+        const abstraction = contract(result);
+        provision(abstraction, this.options);
         return abstraction;
       }
     }
