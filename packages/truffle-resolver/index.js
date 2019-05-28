@@ -6,12 +6,19 @@ const whilst = require("async/whilst");
 const contract = require("truffle-contract");
 const expect = require("truffle-expect");
 const provision = require("truffle-provisioner");
+const ENS = require("ethereum-ens");
 
 class Resolver {
   constructor(options) {
-    expect.options(options, ["working_directory", "contracts_build_directory"]);
+    expect.options(options, [
+      "working_directory",
+      "contracts_build_directory",
+      "provider",
+      "ensRegistryAddress"
+    ]);
 
     this.options = options;
+    this.ens = new ENS(provider, ensRegistryAddress);
 
     this.sources = [
       new EPMSource(
@@ -22,6 +29,20 @@ class Resolver {
       new GlobalNPMSource(),
       new FSSource(options.working_directory, options.contracts_build_directory)
     ];
+  }
+
+  resolveENS(name) {
+    this.ens
+      .resolver(name)
+      .addr()
+      .then(address => address)
+      .catch(error => {
+        const message =
+          `There was a problem resolving your ENS name. Please ` +
+          `ensure you have the right name and that the name is registered. ` +
+          `The error that was thrown is the following: ${error.message}`;
+        throw new Error(message);
+      });
   }
 
   require(import_path, search_path) {
